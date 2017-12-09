@@ -1,54 +1,105 @@
 import React, { Component } from 'react'
 import Dropzone from 'react-dropzone'
+import fileDownload from 'js-file-download'
+import { connect } from 'react-redux'
+import Loader from '../components/Loader'
+import ParserOptions from '../components/ParserOptions'
+
+import parseFile from '../actions/parseFile'
+import setFileToParseOnState from '../actions/setFileToParseOnState'
+import setParsedFileOnState from '../actions/setParsedFileOnState'
 
 class Home extends Component {
 
-  onDrop(acceptedFiles, rejectedFiles) {
-    const reader = new FileReader()
+  state = {
+    isToPDFChecked: true, // parse to pdf
+    isToHashtableChecked: false, // parse to hashtable
+    error: null,
+    isLoading: false
+  }
 
-    const fileInfo = acceptedFiles[0]
+  handleDownloadReport = () => {
+    fileDownload(this.state.file, 'new name.pdf')
+  }
+
+  handleSeeReport = () => {
+    this.props.history.push('/results')
+  }
+
+  handleParse = async () => {
+    if (this.props.fileToParse) {
+      this.setState({ isLoading: true })
+      const parsedFile = await this.props.parseFile(this.state.fileToParse)
+      this.setState({ isLoading: false })
+      } else {
+        this.setState({error: 'Upload CSV first'})
+        setTimeout(() => this.setState({error: null}), 2000)
+      }
+  }
+
+  handleParserOptionChange = () => {
+    this.setState({
+      isToPDFChecked: !this.state.isToPDFChecked,
+      isToHashtableChecked: !this.state.isToHashtableChecked,
+    })
+  }
+
+  onDrop = (acceptedFiles, rejectedFiles) => {
+    const reader = new FileReader()
+    const that = this
 
     reader.onload = () => {
-      const fileAsBinaryString = reader.result
-
-      reader.onabort = () => console.log('file reading was aborted')
-      reader.onerror = () => console.log('file reading has failed')
-
-      const requestParams = {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: fileInfo.name,
-          data: fileAsBinaryString
-        })
-      }
-
-      fetch(process.env.REACT_APP_API_URL + 'csv_parser/', requestParams)
-        .then(res => res.json())
-        .then(data => console.log("data", data))
-      // const req = request.post('/upload');
-      // acceptedFiles.forEach(file => {
-      //     req.attach(file.name, file);
-      // });
-      // req.end(callback);
+      const fileToParse = reader.result
+      that.props.setFileToParseOnState(fileToParse)
+      that.props.setParsedFileOnState(null)
     }
 
     reader.readAsBinaryString(acceptedFiles[0])
   }
 
   render() {
+    const { error, isLoading } = this.state
+    const { parsedFile, fileToParse } = this.props
     return (
       <div className="Home">
-        <h1>CSV Parser</h1>
-        <Dropzone onDrop={this.onDrop}>
-          <p>Try dropping some files here, or click to select files to upload.</p>
+        <div className="logo-container" />
+        <h1 className="title">CSV Parser</h1>
+        <ParserOptions isToPDFChecked={this.state.isToPDFChecked} handleParserOptionChange={this.handleParserOptionChange} />
+        <Dropzone
+          onDrop={this.onDrop}
+          className="dropzone"
+          acceptClassName="accepted"
+          rejectClassName="rejected"
+          multiple={false}
+        >
+          {isLoading ? <Loader /> : null}
+          {error ? <div className="error-container"><p>{error}</p></div> : null }
+          <p>Try dropping a CSV file here, or click to select CSV to upload.</p>
         </Dropzone>
+        {parsedFile 
+          ? <div className="btns-container">
+              <button className="btn see" onClick={this.handleSeeReport}>See Report</button> 
+              <button className="btn download" onClick={this.handleDownloadReport}>Download Report</button> 
+            </div>
+          : <button className={`btn parse ${!fileToParse ? 'disabled' : '' }`} onClick={this.handleParse}>Parse CSV</button>}
       </div>
     );
   }
 }
 
-export default Home;
+function mapDispatchToProps(dispatch) {
+  return {
+    parseFile: file => dispatch(parseFile(file)),
+    setFileToParseOnState: file => dispatch(setFileToParseOnState(file)),
+    setParsedFileOnState: file => dispatch(setParsedFileOnState(file))
+  }
+}
+
+function mapStateToProps(state) {
+  return {
+    parsedFile: state.parsedFile,
+    fileToParse: state.fileToParse
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home)

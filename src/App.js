@@ -9,12 +9,21 @@ import {
 } from 'react-router-dom'
 
 class App extends Component {
+
+  state = {
+    PDFFile: null
+  }
+
+  handlePDFchange = (PDFFile, callback) => {
+    this.setState({ PDFFile }, callback)
+  }
+
   render() {
     return (
       <Router>
         <div className="App">
-          <Route exact path="/" component={Home} />
-          <Route path="/results" component={Results} />
+          <Route exact path="/" render={({ history }) => <Home history={history} handlePDFchange={this.handlePDFchange}/>} />
+          <Route path="/results" render={({ history }) => <Results history={history} PDFFile={this.state.PDFFile} />} />
         </div>
       </Router>
     );

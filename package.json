@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "copy-to-clipboard": "^3.0.8",
     "js-file-download": "^0.4.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-dropzone": "^4.2.3",
+    "react-json-pretty": "^1.7.4",
     "react-pdf": "^2.4.2",
     "react-redux": "^5.0.6",
     "react-router": "^4.2.0",

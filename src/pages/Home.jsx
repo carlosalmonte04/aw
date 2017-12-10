@@ -1,60 +1,75 @@
 import React, { Component } from 'react'
-import Dropzone from 'react-dropzone'
 import fileDownload from 'js-file-download'
 import { connect } from 'react-redux'
 import Loader from '../components/Loader'
 import ParserOptions from '../components/ParserOptions'
+import DropZoneResultsContainer from '../containers/DropZoneResultsContainer'
+import ActionButtonsContainer from '../containers/ActionButtonsContainer'
 
 import parseFile from '../actions/parseFile'
+import downloadFile from '../actions/downloadFile'
+import resetParser from '../actions/resetParser'
 import setFileToParseOnState from '../actions/setFileToParseOnState'
 import setParsedFileOnState from '../actions/setParsedFileOnState'
 
 class Home extends Component {
 
   state = {
-    isToPDFChecked: true, // parse to pdf
-    isToHashtableChecked: false, // parse to hashtable
+    selectedFormat: 'report',
     error: null,
-    isLoading: false
+    isLoading: false,
   }
 
-  handleDownloadReport = () => {
-    fileDownload(this.state.file, 'new name.pdf')
+  handleResetParser = () => {
+    this.props.resetParser()
   }
 
   handleSeeReport = () => {
-    this.props.history.push('/results')
+    this.props.history.push('/results/pdf')
   }
 
-  handleParse = async () => {
+  handleParseReport = async () => {
     if (this.props.fileToParse) {
       this.setState({ isLoading: true })
-      const parsedFile = await this.props.parseFile(this.state.fileToParse)
+      const parsedFile = await this.props.parseFile(this.props.fileToParse, this.state.selectedFormat)
       this.setState({ isLoading: false })
-      } else {
-        this.setState({error: 'Upload CSV first'})
-        setTimeout(() => this.setState({error: null}), 2000)
+    } else {
+      this.throwError('Upload CSV first')
       }
   }
 
-  handleParserOptionChange = () => {
-    this.setState({
-      isToPDFChecked: !this.state.isToPDFChecked,
-      isToHashtableChecked: !this.state.isToHashtableChecked,
-    })
+  handleParserOptionChange = (e) => {
+    const selectedFormat = e.target.id
+    if (this.state.selectedFormat != selectedFormat && this.props.parsedFile) {
+      this.setState({
+        selectedFormat
+      }, () => this.handleParseReport())
+    } else {
+      this.setState({ selectedFormat })
+    }
   }
 
-  onDrop = (acceptedFiles, rejectedFiles) => {
+  handleFileDrop = (files, rejectedFiles) => {
     const reader = new FileReader()
+    const fileName = files[0].name
     const that = this
+    if (!fileName.toLowerCase().includes('.csv')) {
+      this.handleResetParser()
+      this.throwError('No .csv extension found in file name')
+    } else {
+      reader.onload = () => {
+        const fileToParse = reader.result
+        that.props.setFileToParseOnState(fileToParse, fileName)
+        that.props.setParsedFileOnState(null)
+      }
 
-    reader.onload = () => {
-      const fileToParse = reader.result
-      that.props.setFileToParseOnState(fileToParse)
-      that.props.setParsedFileOnState(null)
+      reader.readAsBinaryString(files[0])
     }
+  }
 
-    reader.readAsBinaryString(acceptedFiles[0])
+  throwError = (error) => {
+    this.setState({ error })
+    setTimeout(() => this.setState({ error: null }), 5000)
   }
 
   render() {
@@ -64,24 +79,27 @@ class Home extends Component {
       <div className="Home">
         <div className="logo-container" />
         <h1 className="title">CSV Parser</h1>
-        <ParserOptions isToPDFChecked={this.state.isToPDFChecked} handleParserOptionChange={this.handleParserOptionChange} />
-        <Dropzone
-          onDrop={this.onDrop}
-          className="dropzone"
-          acceptClassName="accepted"
-          rejectClassName="rejected"
-          multiple={false}
-        >
-          {isLoading ? <Loader /> : null}
-          {error ? <div className="error-container"><p>{error}</p></div> : null }
-          <p>Try dropping a CSV file here, or click to select CSV to upload.</p>
-        </Dropzone>
-        {parsedFile 
-          ? <div className="btns-container">
-              <button className="btn see" onClick={this.handleSeeReport}>See Report</button> 
-              <button className="btn download" onClick={this.handleDownloadReport}>Download Report</button> 
-            </div>
-          : <button className={`btn parse ${!fileToParse ? 'disabled' : '' }`} onClick={this.handleParse}>Parse CSV</button>}
+        {isLoading ? <Loader /> : null}
+        <ParserOptions 
+          selectedFormat={this.state.selectedFormat}
+          handleParserOptionChange={this.handleParserOptionChange}
+        />
+        <DropZoneResultsContainer
+          onDrop={this.handleFileDrop}
+          isLoading={this.state.isLoading}
+          error={this.state.error}
+          frontSideAway={!!this.props.fileToParse}
+          resetParser={this.handleResetParser}
+          fileName={this.props.fileName}
+          parsedFile={this.props.parsedFile}
+        />
+        <ActionButtonsContainer 
+          parsedFile={parsedFile}
+          fileToParse={fileToParse}
+          handleParseReport={this.handleParseReport}
+          handleSeeReport={this.handleSeeReport}
+          handleDownloadFile={() => this.props.downloadFile(this.props.parsedFile)}
+        />
       </div>
     );
   }
@@ -89,16 +107,19 @@ class Home extends Component {
 
 function mapDispatchToProps(dispatch) {
   return {
-    parseFile: file => dispatch(parseFile(file)),
-    setFileToParseOnState: file => dispatch(setFileToParseOnState(file)),
-    setParsedFileOnState: file => dispatch(setParsedFileOnState(file))
+    parseFile: (file, selectedFormat) => dispatch(parseFile(file, selectedFormat)),
+    resetParser: () => dispatch(resetParser()),
+    setFileToParseOnState: (file, fileName) => dispatch(setFileToParseOnState(file, fileName)),
+    setParsedFileOnState: file => dispatch(setParsedFileOnState(file)),
+    downloadFile: (parsedFile) => dispatch(downloadFile(parsedFile))
   }
 }
 
 function mapStateToProps(state) {
   return {
     parsedFile: state.parsedFile,
-    fileToParse: state.fileToParse
+    fileToParse: state.fileToParse,
+    fileName: state.fileName
   }
 }
 

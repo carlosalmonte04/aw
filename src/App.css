@@ -14,6 +14,20 @@ body {
   height: 100%;
 }
 
+.Example {
+  width: 595px;
+}
+
+.Example.loading {
+  height: 100vh;
+  background: white;
+  margin-top: 10px;
+}
+
+.ReactPDF__Page {
+  margin-top: 10px;
+}
+
 .App {
   text-align: center;
   justify-content: center;
@@ -27,6 +41,27 @@ body {
   display: flex;
   align-self: center;
   flex-direction: column;
+}
+
+.Results {
+  background: #2f2f2f;
+  width: 100%;
+  justify-content: center;
+  margin: auto;
+  display: flex;;
+}
+
+.json-container {
+  height: 100%;
+  width: 100%;
+  background: #d4d6d0;
+  font-size: 17px;
+  text-align: left;
+  padding: 50px;
+}
+
+.json-key {
+  font-weight: bold;
 }
 
 .logo-container {
@@ -49,7 +84,7 @@ body {
 .error-container {
   opacity: 0;
   position: absolute;
-  animation: fade-in-up 1s 1, fade-out-down 1s 1.8s 1;
+  animation: fade-in-up 1s 1, fade-out-down 1s 3s 1;
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
   animation-fill-mode: forwards;
   background: #6b1718;
@@ -58,8 +93,8 @@ body {
   border: solid #891b1d 2px;
   box-sizing: border-box;
   box-shadow: #891b1d 0px 0px 4px;
-  top: 20em;
   align-self: center;
+  bottom: 10em;
 }
 
 .error-container > p {
@@ -99,18 +134,71 @@ body {
   transform: scale(1.02);
 }
 
+/*
+  BOXED FORMS ANIMATION
+*/
+
+.box-container {
+  max-width: 350px;
+  height: 100%;
+  vertical-align: top;
+  perspective: 1000;
+}
+
+.box3d-container {
+  perspective: 1000;
+}
+
+.boxed-search-form {
+  opacity: 1;
+  transform: translate3d(0px, -0px, 0px) rotateX(0deg) scale(1);
+  transition: all .4s cubic-bezier(0.770, 0.000, 0.175, 1.000);
+  z-index: 1
+}
+
+.dropzone.away {
+  opacity: 0.7;
+  transform: translate3d(0px, -85px, -93px) rotateX(90deg);
+  z-index: -2
+}
+
 .dropzone {
-  transition: box-shadow 0.2s ease-in-out;
-  border: solid #68673b 3px;
+  transform: translate3d(0px, -0px, 0px) rotateX(0deg) scale(1);
+  transition: all .4s cubic-bezier(0.770, 0.000, 0.175, 1.000);
+  border: solid #7b7b7b 3px;
   border-radius: 3px;
-  -webkit-box-shadow: black 1px 1px 1px;
-  box-shadow: #68673b 1px 1px 10px inset;
+  box-shadow: #7b7b7b 1px 1px 10px inset;
   padding: 3em 0em;
   cursor: pointer;
   justify-content: center;
   align-items: center;
   display: flex;
-  flex-direction: column
+  flex-direction: column;
+  max-height: 86px;
+}
+
+.dropzone.results {
+  opacity: 1;
+  transition: all .4s cubic-bezier(0.770, 0.000, 0.175, 1.000);
+  transform: rotateX(0deg) translate3d(0px, -180px, 0px);
+  border: solid #416a40 3px;
+  border-radius: 3px;
+  box-shadow: #416a40 1px 1px 10px inset;
+  position: absolute;
+  z-index: 1;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  width: 100%;
+  background: white;
+  max-height: 53px;
+}
+
+.dropzone.results.away {
+  opacity: 0;
+  transform: rotateX(-90deg) translate3d(0px, 0, -91px);
+  z-index: -2
 }
 
 .accepted {
@@ -121,7 +209,11 @@ body {
 }
 
 .dropzone:hover {
-  box-shadow: #68673b 1px 1px 20px inset; 
+  box-shadow: #7b7b7b 1px 1px 20px inset; 
+}
+
+.dropzone.results:hover {
+  box-shadow: #416a40 1px 1px 10px inset;
 }
 
 .dropzone > p {
@@ -131,6 +223,14 @@ body {
   display: inline-block;
   color: #282c37;
 } 
+
+.download-btns-container {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+}
 
 .btns-container {
   display: flex;
@@ -174,6 +274,16 @@ body {
   background-color: #4c694d;
 }
 
+.btn.copy { 
+  color: #686642;
+  border: solid #686642 3px;
+}
+
+.btn.copy:hover {
+  color: #fff;
+  background-color: #686642;
+}
+
 .btn.parse {
   color: #672f29;
   border: solid #672f29 3px;
@@ -182,6 +292,21 @@ body {
 .btn.parse:hover {
   color: #fff;
   background-color: #672f29;
+}
+
+.btn.reset {
+  color: #444c68;
+  border: solid #444c68 3px;
+  font-size: 0.2em;
+  float: right;
+  position: absolute;
+  top: 10px;
+  right: 30px;
+}
+
+.btn.reset:hover {
+  color: #fff;
+  background-color: #444c68;
 }
 
 .btn.parse.disabled {
@@ -203,6 +328,10 @@ body {
   align-items: center;
 }
 
+.loading-pitch > ul {
+  list-style: none;
+}
+
 .loader {
   top: 2em;
   width: 3em;
@@ -210,7 +339,8 @@ body {
   animation: loaderAnim 0.8s infinite;
   outline: 1px solid transparent;
   position: absolute;
-  z-index: 9
+  z-index: 9;
+  align-self: center;
 }
 
 .loader #largeBox {
@@ -229,6 +359,42 @@ body {
   z-index: 1;
   outline: 1px solid transparent;
   animation: smallBoxAnim 0.8s alternate infinite ease-in-out;
+}
+
+.placeholder {
+  background: linear-gradient(-120deg, #fff, #d5d8d8);
+  animation: placeholder 1s alternate infinite ease-in-out;
+}
+
+.placeholders-container {
+  top: 20px;
+  position: relative;
+}
+
+.logo-placeholder {
+  height: 45px;
+  width: 200px;
+  background-size: 211%;
+  background-repeat: no-repeat;
+  position: relative;
+  top: 35px;
+  left: 60px;
+}
+
+.title-placeholder {
+  height: 65px;
+  width: 300px;
+  margin: 50px auto 0 auto;
+  background-size: 211%;
+  background-repeat: no-repeat;
+}
+
+.line {
+  background: #1d2230;
+  height: 1px;
+  width: 80%;
+  margin: 5px auto 20px auto;
+  top: 10px;
 }
 
 @keyframes smallBoxAnim {
@@ -257,10 +423,18 @@ body {
   100% {opacity: 0; transform: translateY(10px);}
 }
 
+@keyframes placeholder {
+  0% {background-position: 50% }
+  50% {background-position: 100% }
+  70% {background-position: 50% }
+  80% {background-position: 0% }
+  100% {background-position: 0% }
+}
+
 
 @media screen and (max-width: 675px) {
  .error-container {
-  top: 20em;
+    bottom: 11.4em;
  }
   .loader {
     top: 5em;
@@ -268,7 +442,10 @@ body {
 }
 
 @media screen and (max-width: 419px) {
+  .error-container {
+    bottom: 11.4em;
+  }
   .loader {
-    top: 10em;
+    top: 11.4em;
   }
 }

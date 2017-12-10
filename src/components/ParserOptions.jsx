@@ -1,13 +1,13 @@
 import React from 'react'
 
-const ParserOptions = ({ isToPDFChecked, handleParserOptionChange }) => {
-  console.log("IST", isToPDFChecked)
+const ParserOptions = ({ selectedFormat, handleParserOptionChange }) => {
+  const isSelectedOptionPdf = (selectedFormat === 'report')
   return (
     <div className="radios-container">
-      <label className={`radio-label ${isToPDFChecked ? 'checked' : ''}`} onClick={handleParserOptionChange}>to PDF</label>
-      <input className="radio" type="radio" name="parser-type" defaultChecked={isToPDFChecked} />
-      <label className={`radio-label ${!isToPDFChecked ? 'checked' : ''}`} onClick={handleParserOptionChange}>to Hashtable</label>
-      <input className="radio" type="radio" name="parser-type" defaultChecked={!isToPDFChecked}/>
+      <label id="report" className={`radio-label ${isSelectedOptionPdf ? 'checked' : ''}`} onClick={handleParserOptionChange}>to Report</label>
+      <input className="radio" type="radio" name="parser-type" defaultChecked={isSelectedOptionPdf} />
+      <label id="json" className={`radio-label ${!isSelectedOptionPdf ? 'checked' : ''}`} onClick={handleParserOptionChange}>to JSON</label>
+      <input className="radio" type="radio" name="parser-type" defaultChecked={!isSelectedOptionPdf}/>
     </div>
   )
 }

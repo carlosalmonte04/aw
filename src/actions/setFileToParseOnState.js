@@ -1,6 +1,8 @@
-export default function setFileToParseOnState(file) {
+export default function setFileToParseOnState(file, fileName) {
   return {
     type: 'SET_FILE_TO_PARSE_ON_STATE',
-    payload: file
+    payload: {
+      file, fileName
+    }
   }
 }

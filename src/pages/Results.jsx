@@ -1,38 +1,16 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { Document, Page } from 'react-pdf'
+import React, { Component } from 'react';
+import { Route } from 'react-router-dom'
 
-class Results extends Component {
+import ResultsJSON from '../pages/ResultsJSON'
+import ResultsPDF from '../pages/ResultsPDF'
 
-  state = {
-    numPages: 1,
-    pageNumber: 1
-  }
-
-  onDocumentLoad = ({ numPages }) => {
-    this.setState({ numPages });
-  }
-
-  render() {
-    const { pageNumber, numPages } = this.state;
-
-    return (
-      <div>
-        <Document
-          file={this.props.parsedFile}
-          onLoadSuccess={this.onDocumentLoad}
-        >
-          <Page pageNumber={pageNumber} />
-        </Document>
-        <p>Page {pageNumber} of {numPages}</p>
-      </div>
-    );
-  }
+const Results = () => {
+  return (
+    <div className="Results">
+      <Route path="/results/pdf" component={ResultsPDF} />
+      <Route path="/results/json" component={ResultsJSON} />
+    </div>
+  )
 }
 
-function mapStateToProps(state) {
-  return {
-    parsedFile: state.parsedFile
-  }
-}
-export default connect(mapStateToProps)(Results)
+export default Results

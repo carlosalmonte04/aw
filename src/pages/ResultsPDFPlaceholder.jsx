@@ -1,10 +1,9 @@
-import React, { Component } from 'react'
-import ActionButton from '../components/ActionButton'
-import downloadFile from '../actions/downloadFile'
-import getJSON from '../actions/getJSON'
+import React from 'react'
 
 
-const ResultsPDFPlaceholder = ({ status }) => {
+const ResultsPDFPlaceholder = ({ status, history }) => {
+
+  if (status === 'no data') history.push('/')
     return(
       <div className="Example loading">
         <div className="Example__container__document">
@@ -16,8 +15,6 @@ const ResultsPDFPlaceholder = ({ status }) => {
           </div>
           {status === 'loading' ? null : <h1 style={{margin: '50px auto'}}>No data</h1>}
 
-        </div>
-        <div className="download-btns-container">
         </div>
       </div>
     )

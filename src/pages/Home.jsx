@@ -1,23 +1,23 @@
 import React, { Component } from 'react'
-import fileDownload from 'js-file-download'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import Loader from '../components/Loader'
-import ParserOptions from '../components/ParserOptions'
+
+import ParserOptionsContainer from '../containers/ParserOptionsContainer'
 import DropZoneResultsContainer from '../containers/DropZoneResultsContainer'
 import ActionButtonsContainer from '../containers/ActionButtonsContainer'
-
-import parseFile from '../actions/parseFile'
+import changeSelectedFormat from '../actions/changeSelectedFormat'
+import parseCSV from '../actions/parseCSV'
 import downloadFile from '../actions/downloadFile'
 import resetParser from '../actions/resetParser'
-import setFileToParseOnState from '../actions/setFileToParseOnState'
+import setCSVToParseOnState from '../actions/setCSVToParseOnState'
 import setParsedFileOnState from '../actions/setParsedFileOnState'
 
 class Home extends Component {
 
   state = {
-    selectedFormat: 'report',
     error: null,
-    isLoading: false,
+    isLoading: false
   }
 
   handleResetParser = () => {
@@ -28,24 +28,29 @@ class Home extends Component {
     this.props.history.push('/results/pdf')
   }
 
-  handleParseReport = async () => {
-    if (this.props.fileToParse) {
+  handleParseCSV = async (dispatch, forcedFormat) => {
+    const { CSVToParse, selectedFormat, parseCSV } = this.props
+
+    if (CSVToParse) {
       this.setState({ isLoading: true })
-      const parsedFile = await this.props.parseFile(this.props.fileToParse, this.state.selectedFormat)
+      await parseCSV(CSVToParse, (forcedFormat || selectedFormat))
       this.setState({ isLoading: false })
-    } else {
-      this.throwError('Upload CSV first')
-      }
+    }
+    else {
+      this.throwError('Select CSV to parse first')
+    }
   }
 
   handleParserOptionChange = (e) => {
-    const selectedFormat = e.target.id
-    if (this.state.selectedFormat != selectedFormat && this.props.parsedFile) {
-      this.setState({
-        selectedFormat
-      }, () => this.handleParseReport())
-    } else {
-      this.setState({ selectedFormat })
+    const newSelectedFormat = e.target.id
+    const { selectedFormat, parsedFile, changeSelectedFormat } = this.props
+
+    if (newSelectedFormat !== selectedFormat && parsedFile) {
+      changeSelectedFormat(newSelectedFormat)
+      this.handleParseCSV(null, newSelectedFormat) // Allows users to parse existing CSV to another format
+    }
+    else {
+      changeSelectedFormat(newSelectedFormat)
     }
   }
 
@@ -56,12 +61,12 @@ class Home extends Component {
     if (!fileName.toLowerCase().includes('.csv')) {
       this.handleResetParser()
       this.throwError('No .csv extension found in file name')
-    } else {
+    }
+    else {
       reader.onload = () => {
-        const fileToParse = reader.result
-        that.props.setFileToParseOnState(fileToParse, fileName)
-        that.props.setParsedFileOnState(null)
-      }
+        const CSVToParse = reader.result
+        that.props.setCSVToParseOnState(CSVToParse, fileName) // unparsed needed file for raw json
+    }
 
       reader.readAsBinaryString(files[0])
     }
@@ -73,54 +78,79 @@ class Home extends Component {
   }
 
   render() {
-    const { error, isLoading } = this.state
-    const { parsedFile, fileToParse } = this.props
     return (
       <div className="Home">
         <div className="logo-container" />
         <h1 className="title">CSV Parser</h1>
-        {isLoading ? <Loader /> : null}
-        <ParserOptions 
-          selectedFormat={this.state.selectedFormat}
+        {this.state.isLoading ? <Loader /> : null}
+        <ParserOptionsContainer
+          selectedFormat={this.props.selectedFormat}
           handleParserOptionChange={this.handleParserOptionChange}
         />
         <DropZoneResultsContainer
           onDrop={this.handleFileDrop}
           isLoading={this.state.isLoading}
           error={this.state.error}
-          frontSideAway={!!this.props.fileToParse}
+          frontSideAway={!!this.props.CSVToParse}
           resetParser={this.handleResetParser}
           fileName={this.props.fileName}
           parsedFile={this.props.parsedFile}
         />
-        <ActionButtonsContainer 
-          parsedFile={parsedFile}
-          fileToParse={fileToParse}
-          handleParseReport={this.handleParseReport}
+        <ActionButtonsContainer
+          parsedFile={this.props.parsedFile}
+          CSVToParse={this.props.CSVToParse}
+          isLoading={this.state.isLoading}
+          handleParseCSV={this.handleParseCSV}
           handleSeeReport={this.handleSeeReport}
           handleDownloadFile={() => this.props.downloadFile(this.props.parsedFile)}
         />
       </div>
-    );
+    )
   }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    parseFile: (file, selectedFormat) => dispatch(parseFile(file, selectedFormat)),
+    changeSelectedFormat: selectedFormat => dispatch(changeSelectedFormat(selectedFormat)),
+    parseCSV: (file, selectedFormat) => dispatch(parseCSV(file, selectedFormat)),
     resetParser: () => dispatch(resetParser()),
-    setFileToParseOnState: (file, fileName) => dispatch(setFileToParseOnState(file, fileName)),
+    setCSVToParseOnState: (CSV, fileName) => dispatch(setCSVToParseOnState(CSV, fileName)),
     setParsedFileOnState: file => dispatch(setParsedFileOnState(file)),
-    downloadFile: (parsedFile) => dispatch(downloadFile(parsedFile))
+    downloadFile: parsedFile => dispatch(downloadFile(parsedFile))
   }
 }
 
 function mapStateToProps(state) {
   return {
+    selectedFormat: state.selectedFormat,
     parsedFile: state.parsedFile,
-    fileToParse: state.fileToParse,
+    CSVToParse: state.CSVToParse,
     fileName: state.fileName
   }
+}
+
+const {
+  string,
+  func,
+  instanceOf
+} = PropTypes
+
+Home.defaultProps = {
+  parsedFile: new Blob(),
+  fileName: 'no name'
+}
+
+Home.propTypes = {
+  selectedFormat: string.isRequired,
+  parsedFile: instanceOf(Blob),
+  CSVToParse: string, // is actually a file but csv gives files as comma separated 'strings'
+  fileName: string,
+  changeSelectedFormat: func.isRequired,
+  parseCSV: func.isRequired,
+  resetParser: func.isRequired,
+  setCSVToParseOnState: func.isRequired,
+  setParsedFileOnState: func.isRequired,
+  downloadFile: func.isRequired
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home)

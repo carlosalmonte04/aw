@@ -5,7 +5,7 @@ import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import './index.css'
 import filesReducer from './reducers/filesReducer'
-import App from './App'
+import App from './App.jsx'
 import registerServiceWorker from './registerServiceWorker'
 
 const store = createStore(filesReducer, applyMiddleware(thunk))
@@ -15,4 +15,4 @@ ReactDOM.render(
     <App />
   </Provider>
   , document.getElementById('root'));
-registerServiceWorker();
+registerServiceWorker()

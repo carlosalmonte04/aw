@@ -1,7 +1,7 @@
 import setParsedFileOnState from './setParsedFileOnState'
-import setRawFileOnState from './setRawFileOnState'
+import setRawCSVOnState from './setRawCSVOnState'
 
-export default function parseFile(fileToParse, selectedFormat) {
+export default function parseCSV(CSVToParse, selectedFormat) {
   return (dispatch) => {
     const requestParams = {
       method: 'POST',
@@ -10,7 +10,7 @@ export default function parseFile(fileToParse, selectedFormat) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        file_to_parse: fileToParse,
+        file_to_parse: CSVToParse,
         selected_format: selectedFormat
       })
     }
@@ -19,7 +19,7 @@ export default function parseFile(fileToParse, selectedFormat) {
       .then(fileBlob => {
         const parsedFile = new Blob([fileBlob], { type: "application/pdf" })
 
-        dispatch(setRawFileOnState(fileToParse)) // save raw to copy to clipboard
+        dispatch(setRawCSVOnState(CSVToParse)) // save raw to copy to clipboard
         dispatch(setParsedFileOnState(parsedFile)) // save blob to see/download
 
         return parsedFile

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 const ActionButton = ({ action, text, isDisabled, onClick }) => {
   return (
-    <button className={`btn ${action} ${isDisabled ? 'disabled' : ''}`} onClick={onClick}>{text}</button> 
+    <button className={`btn ${action} ${isDisabled ? 'disabled' : ''}`} onClick={onClick} disabled={isDisabled}>{text}</button> 
   )
 }
 

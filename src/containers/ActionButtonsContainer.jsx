@@ -5,12 +5,12 @@ const ActionButtonsContainer = (props) => {
   if (props.parsedFile) {
     return (
       <div className="btns-container">
-        <ActionButton action="see" onClick={props.handleSeeReport} text="See Document" />
-        <ActionButton action="download" onClick={props.handleDownloadFile} text="Download Document" />
+        <ActionButton action="see" onClick={props.handleSeeReport} text="See Document" isDisabled={props.isLoading}/>
+        <ActionButton action="download" onClick={props.handleDownloadFile} text="Download Document" isDisabled={props.isLoading}/>
       </div>
     )
   } else {
-      return <ActionButton action="parse" onClick={props.handleParseReport} text="Parse CSV" isDisabled={!props.fileToParse} />
+      return <ActionButton action="parse" onClick={props.handleParseCSV} text="Parse CSV" isDisabled={!props.CSVToParse || props.isLoading} />
   }
 }
 

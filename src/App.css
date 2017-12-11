@@ -309,17 +309,17 @@ body {
   background-color: #444c68;
 }
 
-.btn.parse.disabled {
-  color: #727476;
-  border: solid #727476 3px;
-  cursor: default;
+button.disabled {
+  color: #727476 !important;
+  border: solid #727476 3px !important;
+  cursor: default !important;
 }
 
-.btn.parse.disabled:hover {
-  color: #727476;
-  border: solid #727476 3px;
-  cursor: no-drop;
-  background-color: white;
+button.disabled:hover {
+  color: #727476 !important;
+  border: solid #727476 3px !important;
+  cursor: no-drop !important;
+  background-color: white !important;
 }
 
 .loader-container {

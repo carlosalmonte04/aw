@@ -24,13 +24,14 @@ class ResultsPDF extends Component {
     })
   }
 
-  onDocumentLoadSuccess = ({ numPages }) =>
+  onDocumentLoadSuccess = ({ numPages }) => {
     this.setState({
       numPages,
     })
+  }
 
   handleGetJSON = async () => {
-    this.props.getJSON(this.props.rawFile)
+    this.props.getJSON(this.props.CSV)
     .then(() => this.props.history.push('/results/json'))
   }
 
@@ -42,8 +43,8 @@ class ResultsPDF extends Component {
           <Document
             file={file}
             onLoadSuccess={this.onDocumentLoadSuccess}
-            loading={<ResultsPDFPlaceholder status="loading" />}
-            noData={<ResultsPDFPlaceholder status="no-data"/>}
+            loading={<ResultsPDFPlaceholder status="loading"/>}
+            noData={<ResultsPDFPlaceholder status="no data" history={this.props.history}/>}
           >
             {
               Array.from(
@@ -59,7 +60,7 @@ class ResultsPDF extends Component {
           </Document>
         </div>
         <div className="download-btns-container">
-          <ActionButton action="download" onClick={() => this.props.downloadFile(this.props.parsedFile)} text="Download Report" />
+          <ActionButton action="download" onClick={() => this.props.downloadFile()} text="Download Report" />
           <ActionButton action="see-raw-json" onClick={this.handleGetJSON} text="Raw Json" />
         </div>
       </div>
@@ -69,7 +70,7 @@ class ResultsPDF extends Component {
 
 function mapDispatchToProps(dispatch) {
   return {
-    downloadFile: (parsedFile) => dispatch(downloadFile(parsedFile)),
+    downloadFile: () => dispatch(downloadFile()),
     getJSON: fileToParse => dispatch(getJSON(fileToParse))
   }
 }
@@ -77,7 +78,7 @@ function mapDispatchToProps(dispatch) {
 function mapStateToProps(state) {
   return {
     parsedFile: state.parsedFile,
-    rawFile: state.rawFile,
+    CSV: state.CSVToParse,
     jsonFile: state.jsonFile
   }
 }

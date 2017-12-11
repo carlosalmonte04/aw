@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Dropzone from 'react-dropzone'
-import Loader from './Loader'
 import ActionButton from './ActionButton'
 
 const DropZone = ({ fileName, className, resetParser, isLoading, parsedFile }) => {

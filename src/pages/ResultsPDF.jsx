@@ -60,7 +60,7 @@ class ResultsPDF extends Component {
           </Document>
         </div>
         <div className="download-btns-container">
-          <ActionButton action="download" onClick={() => this.props.downloadFile()} text="Download Report" />
+          <ActionButton action="download" onClick={() => this.props.downloadFile(this.props.parsedFile)} text="Download Report" />
           <ActionButton action="see-raw-json" onClick={this.handleGetJSON} text="Raw Json" />
         </div>
       </div>
@@ -70,7 +70,7 @@ class ResultsPDF extends Component {
 
 function mapDispatchToProps(dispatch) {
   return {
-    downloadFile: () => dispatch(downloadFile()),
+    downloadFile: parsedFile => dispatch(downloadFile(parsedFile)),
     getJSON: fileToParse => dispatch(getJSON(fileToParse))
   }
 }
